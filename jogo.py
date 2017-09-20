@@ -3,93 +3,79 @@ from pygame.locals import *
 import tetris as t
 import algoritmoGenetico as ag
 
-size = [640, 480]
-screen = pygame.display.set_mode((size[0], size[1]))
+#size = [640, 480]
+#screen = pygame.display.set_mode((size[0], size[1]))
 
 #add individuo,
-def jogar(individuo, multVel, scoreMax = 20000, jogoRapido = False):
+def jogar(individuos , multVel, scoreMax = 20000, jogoRapido = False):
 
+    numInd = len(individuos)
+    
     t.FPS = int(multVel)
-    t.main()
-
-    board = t.getBlankBoard()
-    lastFallTime = time.time()
-    score = 0
+    t.main(telaX = 240 * numInd + 100, telaY = 260, boxSize = 10)
     
-    level, fallFreq = t.calculateLevelAndFallFreq(score)
+    board = [t.getBlankBoard() for i in range(len(individuos))]
 
-    fallingPiece = t.getNewPiece()
-    nextPiece = t.getNewPiece() #sera necessario ????
-    individuo.calcularMelhorJogada(board, fallingPiece)
-    #individuo.calcularMelhorJogada(board, fallingPiece, jogoRapido)
-    pecasJogadas = 0
-    linhasDestruidas = [0,0,0,0] #combos
+    score = [0 for i in range(numInd)]
     
-    vivo = True
-    ganhou = False
+    #   ??? deveria estar dentro de individuo ???
+    pecasJogadas = [0 for i in range(numInd)]
+    linhasDestruidas = [[0,0,0,0] for i in range(numInd)] #combos
 
+    vivo = [True for i in range(numInd)]
+    ganhou = [False for i in range(numInd)]
+
+    nextPiece = t.getNewPiece()
     
-    while vivo: #game loop
+    while vivo !=  [False] * numInd : #game loop
+        '''
         #process
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 print ("Game exited by user")
                 exit()
-                
-        if fallingPiece == None:
-            # nenhuma peca caindo, gera uma nova peca
-            fallingPiece = nextPiece
-            nextPiece = t.getNewPiece()
+        '''
+        
+        fallingPiece = nextPiece
+        nextPiece = t.getNewPiece()
 
-            #decide a melhor jogada baseado no que acha (pesos)
-            individuo.calcularMelhorJogada(board, fallingPiece, jogoRapido)
+        #decide a melhor jogada baseado no que acha (pesos)
+        for i in range(len(individuos)):
+            if vivo[i]:
+                individuos[i].calcularMelhorJogada(board[i], fallingPiece, True)
 
-            pecasJogadas +=1
-            score += 1
+                if not t.isValidPosition(board[i], fallingPiece):
+                    #nao existe possiçao que caiba na tela
+                    vivo[i] = False
+                else:
+                    pecasJogadas[i] +=1
+                    score[i] += 1
 
-            lastFallTime = time.time() # reseta lastFallTime
+                    t.addToBoard(board[i], fallingPiece)
+                    numLines = t.removeCompleteLines(board[i])
+                    if(numLines == 1):
+                        score[i] += 40
+                        linhasDestruidas[i][0] += 1
+                    elif (numLines == 2):
+                        score[i] += 120
+                        linhasDestruidas[i][1] += 1
+                    elif (numLines == 3):
+                        score[i] += 300
+                        linhasDestruidas[i][2] += 1
+                    elif (numLines == 4):
+                        score[i] += 1200
+                        linhasDestruidas[i][3] += 1
 
-            if not t.isValidPosition(board, fallingPiece):
-                #nao existe possiçao que caiba na tela
-                vivo = False
-
-
-        if jogoRapido or time.time() - lastFallTime > fallFreq:
-
-            if not t.isValidPosition(board, fallingPiece, adjY=1):
-                # A peca caiu, adiciona ela para o tabuleiro
-                t.addToBoard(board, fallingPiece)
-                numLines = t.removeCompleteLines(board)
-                if(numLines == 1):
-                    score += 40
-                    linhasDestruidas[0] += 1
-                elif (numLines == 2):
-                    score += 120
-                    linhasDestruidas[1] += 1
-                elif (numLines == 3):
-                    score += 300
-                    linhasDestruidas[2] += 1
-                elif (numLines == 4):
-                    score += 1200
-                    linhasDestruidas[3] += 1
-
-                fallingPiece = None
-            else:
-                # A peca ainda esta caindo, move ela para baixo
-                fallingPiece['y'] += 1
-                lastFallTime = time.time()
-
-
-        if not jogoRapido:
-            desenharNaTela(board,score,level,nextPiece, fallingPiece)
-
-        #condiçao de parada
-        if score > scoreMax:
-            vivo = False
-            ganhou = True
+                    #condiçao de parada
+                    if score[i] > scoreMax:
+                        vivo[i] = False
+                        ganhou[i] = True
+        
+        #if not jogoRapido:
+        desenharNaTela(board,score, 1, nextPiece, fallingPiece)
 
     # retorna [numero de pecas, linhas destruidas(combos de 1,2,3,4), score normal de tetris, ganhou]
-    gameState = [pecasJogadas, linhasDestruidas ,score, ganhou]
+    gameState = [[pecasJogadas[i], linhasDestruidas[i] ,score[i], ganhou[i]] for i in range(numInd)]
     return(gameState)
 
 
@@ -97,15 +83,18 @@ def jogar(individuo, multVel, scoreMax = 20000, jogoRapido = False):
 
 def desenharNaTela(board,score,level,nextPiece,fallingPiece):
     t.DISPLAYSURF.fill(t.BGCOLOR)
-    t.drawBoard(board)
-    t.drawStatus(score, level)
-    t.drawNextPiece(nextPiece)
-    if fallingPiece != None:
-        t.drawPiece(fallingPiece)
+    for i in range(len(score)):
+        t.drawBoard(board[i], 10+ 120 *i) #list
+    
+        t.drawStatus(score[i], level, margemX = 50+120*i) #list int
+    
+        #t.drawNextPiece(nextPiece)
+    #if fallingPiece != None:
+        #t.drawPiece(fallingPiece, -100)
 
     pygame.display.update()
 
-    t.FPSCLOCK.tick(t.FPS)
+    #t.FPSCLOCK.tick(t.FPS)
 
 
 
@@ -116,7 +105,13 @@ if __name__ == '__main__':
     for k2 in range (0,numPesos):
         pesos0[k2] = 2*random.random()-1
     pesos0= [-0.97, 5.47, -13.74, -0.73,  7.99, -0.86, -0.72]
+    pesos1 = numPesos*[0]
+    for k2 in range (0,numPesos):
+        pesos1[k2] = 2*random.random()-1
+    pesos1= [1,1,1,1,1,1,1]
+    
     indiv = ag.Individuo(pesos0)
+    indiv2 = ag.Individuo(pesos1)
 	
-    print(jogar(indiv,300,scoreMax = 200000))
+    print(jogar([indiv,indiv2],300,scoreMax = 200000))
     
