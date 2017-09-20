@@ -6,7 +6,7 @@
 ##                                  ##
 ########################################################################################
 
-import pygame
+
 import random
 
 import tetris as t
@@ -44,7 +44,7 @@ class Individuo():
     def fitness(self,gameState):
         #gameState = [numero de pecas, linhas destruidas(combos de 1,2,3,4), score normal de tetris, ganhou]
         #k1*t - abs(deltaY(morreu)[player-bolinha))
-        self.score = gameState[0]
+        self.score = gameState[2]
 
 
     ### ------------------- calcular_saida:

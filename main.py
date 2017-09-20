@@ -46,26 +46,24 @@ import algoritmoGenetico as ag
 
 def main():
 
-    numInd = 10
+    numInd = 20
     geracao = ag.Geracao(numInd)
-    #vel_jogo = int(input('Velocidade de jogo desejada: '))*100
-    vel_jogo = 500
-    for j in range(numInd):
+    vel_jogo = 200
+    for j in range(10): # 10 geracoes 
         print (' \n')
         print (' - - - - Geração atual: {} - - - - ' .format(j+1))
         print (' \n')
         #print("   Score: ",geracao.individuos[i].fitness(gameState),"\n")
-        for i in range(10):
-            gameState = jogo.jogar(geracao.individuos[i], vel_jogo, scoreMax = 200000, jogoRapido = False)
-            geracao.individuos[i].fitness(gameState)
-            geracao.selecao(1)
-            print("melhor individuo da geração!!!")
+        #joga todos os individuos da geracao de uma vez
+        gameState = jogo.jogar(geracao.individuos, vel_jogo, scoreMax = 200000, jogoRapido = True)
+        for i in range(numInd):
+            geracao.individuos[i].fitness(gameState[i])
         geracao.selecao(3)
-        geracao.reproduzir(10)
+        geracao.reproduzir(numInd)
 
     geracao.selecao(1)
     print("melhor individuo!!!")
-    gameState = jogo.jogar(geracao.individuos[0], vel_jogo, 1)    
+    gameState = jogo.jogar([geracao.individuos[0]], vel_jogo, 1)    
 
     return(geracao)
 
