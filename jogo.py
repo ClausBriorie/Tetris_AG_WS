@@ -1,5 +1,5 @@
-import random, time, pygame, sys
-from pygame.locals import *
+import random, pygame
+
 import tetris as t
 import algoritmoGenetico as ag
 
@@ -12,7 +12,7 @@ def jogar(individuos , multVel, scoreMax = 20000, jogoRapido = False):
     numInd = len(individuos)
     
     t.FPS = int(multVel)
-    t.main(telaX = 240 * numInd + 100, telaY = 260, boxSize = 10)
+    t.main(telaX = 120 * numInd + 100, telaY = 260 * ((numInd-1)//10 + 1), boxSize = 10)
     
     board = [t.getBlankBoard() for i in range(len(individuos))]
 
@@ -84,9 +84,9 @@ def jogar(individuos , multVel, scoreMax = 20000, jogoRapido = False):
 def desenharNaTela(board,score,level,nextPiece,fallingPiece):
     t.DISPLAYSURF.fill(t.BGCOLOR)
     for i in range(len(score)):
-        t.drawBoard(board[i], 10+ 120 *i) #list
+        t.drawBoard(board[i], margemX = 10+ 120 * (i % 10), margemY =(i//10) * 260 + t.TOPMARGIN) #list
     
-        t.drawStatus(score[i], level, margemX = 50+120*i) #list int
+        t.drawStatus(score[i], level, margemX = 20+120* (i % 10), margemY =(i//10) * 260) #list int
     
         #t.drawNextPiece(nextPiece)
     #if fallingPiece != None:
@@ -94,7 +94,7 @@ def desenharNaTela(board,score,level,nextPiece,fallingPiece):
 
     pygame.display.update()
 
-    #t.FPSCLOCK.tick(t.FPS)
+    t.FPSCLOCK.tick(t.FPS)
 
 
 

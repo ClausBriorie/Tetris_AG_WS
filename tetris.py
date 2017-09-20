@@ -480,13 +480,13 @@ def removeCompleteLines(board):
     return numLinesRemoved
 
 
-def convertToPixelCoords(boxx, boxy, margemX = XMARGIN):
+def convertToPixelCoords(boxx, boxy, margemX = XMARGIN, margemY = TOPMARGIN):
     # Convert the given xy coordinates of the board to xy
     # coordinates of the location on the screen.
-    return (margemX + (boxx * BOXSIZE)), (TOPMARGIN + (boxy * BOXSIZE))
+    return (margemX + (boxx * BOXSIZE)), (margemY + (boxy * BOXSIZE))
 
 
-def drawBox(boxx, boxy, color, pixelx=None, pixely=None, margemX = XMARGIN):
+def drawBox(boxx, boxy, color, pixelx=None, pixely=None, margemX = XMARGIN, margemY = TOPMARGIN):
     # draw a single box (each tetromino piece has four boxes)
     # at xy coordinates on the board. Or, if pixelx & pixely
     # are specified, draw to the pixel coordinates stored in
@@ -494,28 +494,28 @@ def drawBox(boxx, boxy, color, pixelx=None, pixely=None, margemX = XMARGIN):
     if color == BLANK:
         return
     if pixelx == None and pixely == None:
-        pixelx, pixely = convertToPixelCoords(boxx, boxy, margemX)
+        pixelx, pixely = convertToPixelCoords(boxx, boxy, margemX, margemY)
     pygame.draw.rect(DISPLAYSURF, COLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
     pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[color], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
 
 
-def drawBoard(board, margemX = XMARGIN):
+def drawBoard(board, margemX = XMARGIN, margemY = TOPMARGIN):
     # draw the border around the board
-    pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (margemX - 3, TOPMARGIN - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
+    pygame.draw.rect(DISPLAYSURF, BORDERCOLOR, (margemX - 3, margemY - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
 
     # fill the background of the board
-    pygame.draw.rect(DISPLAYSURF, BGCOLOR, (margemX, TOPMARGIN, BOXSIZE * BOARDWIDTH, BOXSIZE * BOARDHEIGHT))
+    pygame.draw.rect(DISPLAYSURF, BGCOLOR, (margemX, margemY , BOXSIZE * BOARDWIDTH, BOXSIZE * BOARDHEIGHT))
     # draw the individual boxes on the board
     for x in range(BOARDWIDTH):
         for y in range(BOARDHEIGHT):
-            drawBox(x, y, board[x][y], None, None, margemX)
+            drawBox(x, y, board[x][y], None, None, margemX, margemY)
 
 
-def drawStatus(score, level, margemX = WINDOWWIDTH - 150):
+def drawStatus(score, level, margemX = WINDOWWIDTH - 150, margemY = 0):
     # draw the score text
     scoreSurf = BASICFONT.render('Score: %s' % score, True, TEXTCOLOR)
     scoreRect = scoreSurf.get_rect()
-    scoreRect.topleft = (margemX, 20)
+    scoreRect.topleft = (margemX, margemY + 20)
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
     # draw the level text
@@ -525,17 +525,17 @@ def drawStatus(score, level, margemX = WINDOWWIDTH - 150):
     DISPLAYSURF.blit(levelSurf, levelRect)
 
 
-def drawPiece(piece, margemX = XMARGIN, pixelx=None, pixely=None):
+def drawPiece(piece, margemX = XMARGIN, margemY = TOPMARGIN, pixelx=None, pixely=None):
     shapeToDraw = PIECES[piece['shape']][piece['rotation']]
     if pixelx == None and pixely == None:
         # if pixelx & pixely hasn't been specified, use the location stored in the piece data structure
-        pixelx, pixely = convertToPixelCoords(piece['x'], piece['y'], margemX)
+        pixelx, pixely = convertToPixelCoords(piece['x'], piece['y'], margemX, margemY)
 
     # draw each of the boxes that make up the piece
     for x in range(TEMPLATEWIDTH):
         for y in range(TEMPLATEHEIGHT):
             if shapeToDraw[y][x] != BLANK:
-                drawBox(None, None, piece['color'], pixelx + (x * BOXSIZE), pixely + (y * BOXSIZE), margemX)
+                drawBox(None, None, piece['color'], pixelx + (x * BOXSIZE), pixely + (y * BOXSIZE), margemX, margemY)
 
 
 def drawNextPiece(piece):
@@ -545,7 +545,7 @@ def drawNextPiece(piece):
     nextRect.topleft = (WINDOWWIDTH - 120, 80)
     DISPLAYSURF.blit(nextSurf, nextRect)
     # draw the "next" piece
-    drawPiece(piece,margemX, pixelx=WINDOWWIDTH-120, pixely=100)
+    drawPiece(piece,margemX,margemY, pixelx=WINDOWWIDTH-120, pixely=100)
 
 def calcularInfosDaJogada(board, peca, x, r, buracosTotaisAntes, tampasTotaisAntes):
 

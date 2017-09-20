@@ -46,9 +46,9 @@ import algoritmoGenetico as ag
 
 def main():
 
-    numInd = 10
+    numInd = 20
     geracao = ag.Geracao(numInd)
-    vel_jogo = 60
+    vel_jogo = 200
     for j in range(10): # 10 geracoes 
         print (' \n')
         print (' - - - - Geração atual: {} - - - - ' .format(j+1))
@@ -59,7 +59,7 @@ def main():
         for i in range(numInd):
             geracao.individuos[i].fitness(gameState[i])
         geracao.selecao(3)
-        geracao.reproduzir(10)
+        geracao.reproduzir(numInd)
 
     geracao.selecao(1)
     print("melhor individuo!!!")
